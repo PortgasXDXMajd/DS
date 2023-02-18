@@ -1,0 +1,18 @@
+
+zk.create("/my_queue")
+
+item_path = zk.create(queue_path + '/queue-', data=item_data, sequence=True, ephemeral=True)
+
+while true:
+    children = zk.get_children(queue_path, watch=True)
+
+    if not children:
+        continue
+
+    lowest_seq = min(children)
+    lowest_path =  '/my_queue/' + lowest_seq
+    item_data = zk.getData(lowest_path)
+
+    //do something with the data.
+
+    zk.delete(lowest_path)

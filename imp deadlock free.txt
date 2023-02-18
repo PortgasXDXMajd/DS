@@ -1,0 +1,3 @@
+to create a deadlock free transaction, we can use a sequentail access to the locks, so we store the locks in a hirarchical manner, that way
+it will force all concurent process to use the same sequence of lock to acuire them. So, if process A got lock-1 and goes to lock-2 and process
+B has to aquire lock-1 first it can't aquire lock-2 first. So that solves the deadlock problem.

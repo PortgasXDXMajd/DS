@@ -1,0 +1,30 @@
+# Create a queue node
+queue_path = '/my_priority_queue'
+zk.create(queue_path, ephemeral=False)
+
+# Add an item to the queue
+The lower the number the higher the probability is.
+priority = get_item_priority(item_data)
+item_path = zk.create(queue_path + '/queue-' + str(priority), data=item_data, sequence=True, ephemeral=True)
+
+# Get the highest-priority item from the queue
+while True:
+    # Get the list of children for the queue node
+    children = zk.get_children(queue_path, watch=True)
+
+    # If the queue is empty, wait for a notification and try again
+    if not children:
+        continue
+
+    # Get the child with the lowest priority number
+    lowest_priority = min(int(child.split('-')[-1]) for child in children)
+    lowest_path = queue_path + '/queue-' + str(lowest_priority)
+    lowest_seq = min(zk.get_children(lowest_path))
+    lowest_path += '/' + lowest_seq
+    item_data, _ = zk.get(lowest_path)
+
+    # Process the item
+    process_item(item_data)
+
+    # Delete the item from the queue
+    zk.delete(lowest_path)

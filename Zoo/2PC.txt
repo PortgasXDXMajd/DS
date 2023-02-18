@@ -1,0 +1,38 @@
+to create two phase commit protocol we do the following:
+1. coordinator create a tranaction node:
+
+transPath = '/app/txn'
+zk.create(transPath, data = "")
+transPath += "/"
+for node in participants:
+    create(transPath + node.id, data = "")
+
+# Participants read child nodes and set a watch
+for node in participants:
+    children = getChildren(transPath, watch=True)
+
+# Participants vote and write their decision to their child node
+for node in participants:
+    decision = vote() // wheter they can do it or not
+    setData(transPath + node.id, data = decision)
+
+# Coordinator reads all child nodes and decides on transaction outcome
+votes = []
+for node in participants:
+    vote = getData(transPath + node.id)
+    votes.append(vote)
+if "abort" in votes:
+    outcome = "abort"
+else:
+    outcome = "commit"
+
+# Coordinator writes outcome to transaction node
+setData(transPath, data=outcome)
+
+# Participants read transaction outcome and take action
+for node in participants:
+    outcome = getData(transPath)
+    if outcome == "commit":
+        commit()
+    else:
+        abort()

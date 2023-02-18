@@ -1,0 +1,19 @@
+# create a znode for every resourse 
+
+resPath = '/app/res'
+zk.create(resPath,"ResName")
+
+for lock needed for res
+    create(resPath+'/lock-', SEQUENTIAL)
+
+each transaction
+
+for lock in getChildren(resPath,true).sort(asc)
+    checkLockPath = resPath+'/'+lock.path+'/isLocked'
+    if(!exist(checkLockPath,watch))
+        create(checkLockPath,EPHERMAL)
+        continue
+    else
+        break and wait till the watch notification comes and then we create the lock
+        that way all processes have to go through the same order of locks for a given resourse and can't acquire any lock
+        unless it acquires the one before it.
